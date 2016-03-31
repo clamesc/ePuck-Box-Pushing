@@ -1,0 +1,14 @@
+RobotAPI is a modular API for both the e-puck robot and the LDVbot, which is a
+somehow similar, but stripped down and much cheaper clone of the e-puck created
+at the Chair for Data Processing at the Technical University of Munich (TUM).
+
+It replaces the old epucklib and non-public code from our chair used to talk
+to the LDVbot. As all our e-pucks do have an overo extension module, the e-puck
+related code uses a local serial connection to talk directly to the robot. If
+you are used to connect via bluetooth and want to use this library, expect some
+effort to make it work.
+
+Some example code how to use this library can be found in the example.py file
+in the top level of this repository. Additional documentation about the design
+goals and the supplied interfaces can be found in the doc folder (at the moment
+only in German).
