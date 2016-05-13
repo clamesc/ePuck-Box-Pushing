@@ -1,3 +1,5 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
 '''
     Copyright © 2016 by Michael Keil
     
@@ -18,6 +20,7 @@
 from robot.robot import robot
 from robot.eLed import led_status
 import time
+import sys
 
 def test_lConnect():
     mRobot = robot().getLdvBot(238)
@@ -153,4 +156,12 @@ def test_eCamera():
     mRobot.disconnect() 
     
 if __name__ == '__main__':
-    test_lConnect()
+    try:
+        test_eConnect()
+        test_eMovement()
+    except:
+        mRobot = robot().getEpuck()
+        mRobot.connect()
+        mRobot.reset()
+        mRobot.disconnect()
+        sys.exit(0)
