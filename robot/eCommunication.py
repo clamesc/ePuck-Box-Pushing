@@ -94,7 +94,7 @@ class communication:
         :pType tuple
         """
         
-        acks = ['j', 't']
+        acks = ['j', 't', 'ds']
 
         if order[0] == 'L':
             # Leds

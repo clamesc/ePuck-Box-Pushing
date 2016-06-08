@@ -17,10 +17,10 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 import logging
+import math
 
 import eCommunication
 import epuck
-
 
 class movement:
     '''
@@ -41,7 +41,59 @@ class movement:
             logging.error('Parameter has to be of type robot')
             raise ValueError("Parameter has to be of type robot") 
         
-                 
+    def drive(self, speed, dist, angle):
+        """
+        Setter Motor drive
+
+        :parameter: speed
+        :pType: Integer [-1000,1000], currently ignored
+        :parameter: dist
+        :pType: Float [mm]
+        :parameter: angle
+        :pType: Float [Degree]
+        """
+
+        if not self._robot.getConnectionStatus():
+            logging.exception('No connection available')
+            raise Exception, 'No connection available'
+
+        # Calculate steps for movement commands
+        #
+        # Known parameters:
+        # PG15S-D20 transmission yields 0.36°/step
+        # avg. wheel diameter: 41.15mm
+        # avg. wheel distance (= robot's movement diameter): 53.4mm
+        steps_r = 0
+        steps_l = 0
+
+        # Angle
+        steps_r += angle / (0.36) * (53.4/41.15)
+        steps_l += angle / (-0.36) * (53.4/41.15)
+        # Distance
+        steps_r += dist / (math.pi * 41.15 / 1000)
+        steps_l += dist / (math.pi * 41.15 / 1000)
+
+        order = ('d', int(steps_l), int(steps_r))
+        self._communication.write_actuators_epuck(order)
+
+    def turnLeft(self):
+        """
+        Turn left 90 degree
+        """
+        self.drive(0, 0, 90)
+
+    def turnRight(self):
+        """
+        Turn right 90 degree
+        """
+        self.drive(0, 0, -90)
+
+    def turnAround(self):
+        """
+        Turn left 180 degree
+        """
+        self.drive(0, 0, 180)
+
     def setPosition(self, l_wheel, r_wheel):
         """
         Setter motor position
