@@ -1,10 +1,14 @@
-#!/usr/bin/python
+                                                                                               #!/usr/bin/python
 
 import math
 import numpy as np
 import operator
 from cmath import rect, phase
 from math import radians, degrees
+from random import randint
+from time import sleep
+from robot.robot import robot
+import boxtracking
 
 
 def get_box_position(proximity_values=(3739, 256, 55, 75, 113, 87, 786, 3810, 3903, 3882), deg=True):
@@ -24,7 +28,7 @@ def get_box_position(proximity_values=(3739, 256, 55, 75, 113, 87, 786, 3810, 39
     '''
 
     proximity_data = np.loadtxt('proximity_values.txt')
-    target_values = np.arange(-9, 10) * 10
+    target_values = np.arange(-18, 18) * 10
     proximity_values = np.array(proximity_values[:8])
     neighbors, distances = getNeighbors(proximity_data, proximity_values, 3)
     angles = target_values[neighbors]
@@ -63,18 +67,20 @@ class boxtracking:
     epuck = None
     position = []
 
-    def __init__(self, epuck):
-        self.epuck = epuck
+    def __init__(self):
+        self.epuck = robot().getEpuck()
+        self.epuck.connect()
 
+    def prox(self):
+        resp = self.epuck.getProximitySensor().getValues()
+        while type(resp) == bool:
+            resp = self.epuck.getProximitySensor().getValues()
+        return resp
+    
     def record(self):
-        self.epuck.step()
-        sleep(0.01)
         values = []
-        for i in range(10):
-            self.epuck.step()
-            sleep(0.01)
-            values.append(self.epuck.get_proximity()[:8])
-            sleep(0.01)
+        for i in range(20):
+            values.append(self.prox()[:8])
         position.append(np.mean(values, axis=0))
 
     def save(self):

@@ -84,14 +84,14 @@ if __name__ == '__main__':
         gamma = 0.8
         desiredDirection = 0
         nbOfActions = 3  # has to be an odd number
-        nbOfStates = 8
-        turnAngle = 25
-        stepsize = 50
-        episode = 1
+        nbOfStates = 10
+        turnAngle = 45
+        stepsize = 90
+        episode = int(np.loadtxt("e.txt"))#1
         orientation = 0
         greedyFactor = 0.4
-        delta = 360 / nbOfStates
-        Q = np.zeros((nbOfStates, nbOfActions))
+        delta = 360.0 / nbOfStates
+        Q = np.loadtxt("Q.txt") #np.zeros((nbOfStates, nbOfActions))
 
         while True:
             robOri = initialise_state()
@@ -142,6 +142,8 @@ if __name__ == '__main__':
 
                 current_state = new_state
     finally:
+        np.savetxt('Q.txt',Q)
+        np.savetxt('e.txt',[episode])
         epuck = robot().getEpuck()
         epuck.connect()
         epuck.reset()
