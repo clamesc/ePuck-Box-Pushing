@@ -44,6 +44,10 @@ def do_action(orientation, action):
     epuck.getMotor().drive(speed=0, dist=stepsize, angle=0)
     sleep(1)
 
+    # After a while, the robot does weird movements
+    # This prevents it:
+    epuck.reset()
+
     return (orientation + new_orientation) % (360)
 
 
