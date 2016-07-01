@@ -182,10 +182,10 @@ if __name__ == '__main__':
                     print ""
                     
                     try:
-                        Q = np.loadtxt("Q.txt")
-                        s_all = np.loadtxt("s.txt")
-                        np.savetxt("Q.txt", np.concatenate((Q,Q),axis=0))
-                        np.savetxt("s.txt", np.concatenate((s_all,episodeSteps),axis=0))
+                        Q_old = np.loadtxt("Q.txt")
+                        s_old = np.loadtxt("s.txt")
+                        np.savetxt("Q.txt", np.concatenate((Q_old,Q),axis=0))
+                        np.savetxt("s.txt", np.concatenate((s_old,np.array([episodeSteps])),axis=0))
                     except:
                         np.savetxt("Q.txt", np.array([Q]))
                         np.savetxt("s.txt",[episodeSteps])
