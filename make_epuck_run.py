@@ -43,7 +43,7 @@ def do_action(orientation, action):
     print "Boxposition: " + str(boxpos)
     print 'Turn: ' + str(boxpos + action * turnAngle)
 
-    new_orientation = boxpos + action * turnAngle
+    new_orientation = old_boxpos + boxpos + action * turnAngle
 
     epuck.getMotor().drive(speed=0, dist=0, angle=(boxpos + action * turnAngle))
     sleep(1)
