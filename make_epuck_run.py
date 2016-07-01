@@ -28,7 +28,6 @@ def choose_action(current_state, episode):
         i = np.random.randint(nbOfActions - 1)
         return np.delete(np.arange(nbOfActions), qmax)[i]
 
-
 def do_action(orientation, action):
     action = action - (nbOfActions // 2)
     # As the box tracking is most precise in the front, we first turn
@@ -56,14 +55,11 @@ def do_action(orientation, action):
 
     return (orientation + new_orientation) % (360)
 
-
 def get_current_state(robOri):
     return int(get_orientation(robOri) // delta)
 
-
 def get_orientation(robOri):
     return (robOri + box_position()) % (360)
-
 
 def box_position():
 
@@ -73,7 +69,6 @@ def box_position():
     while type(resp) == bool:
         resp = epuck.getProximitySensor().getValues()
     return boxtracking.get_box_position(resp)
-
 
 def get_reward(current_state):
     if current_state == int(desiredDirection // delta):
@@ -113,13 +108,11 @@ def getNeighbors(trainingSet, testInstance, k):
     distances = distances[distances[:, 1].argsort()]
     return distances[:k, 0].astype(int), distances[:k, 1]
 
-
 def euclideanDistance(instance1, instance2):
     distance = 0
     for x in range(instance1.shape[0]):
         distance += pow((instance1[x] - instance2[x]), 2)
     return math.sqrt(distance)
-
 
 def weightedMean(targets, distances):
     mean = 0
@@ -149,11 +142,19 @@ if __name__ == '__main__':
         nbOfStates = 10
         turnAngle = 45
         stepsize = 90
-        episode = int(np.loadtxt("e.txt"))#1
+        episodeSteps = 0
         greedyFactor = 0.4
         delta = 360.0 / nbOfStates
-        Q = np.loadtxt("Q.txt") #np.zeros((nbOfStates, nbOfActions))
-
+        
+        try:
+            episode = int(np.loadtxt("e.txt"))
+        except:
+            episode = 1
+        try:
+            Q = np.loadtxt("Q.txt")
+        except:
+            Q = np.zeros((nbOfStates, nbOfActions))
+        
         while True:
             robOri = initialise_state()
             print "Orientation: " + str(robOri)
@@ -176,12 +177,20 @@ if __name__ == '__main__':
                     Q[current_state, action] = Q[current_state, action] + alpha * \
                         (R + gamma * max(Q[new_state, :]) - Q[current_state, action])
 
-                    episode += 1
-
                     print "Q values:"
                     print Q
                     print ""
-
+                    
+                    try:
+                        Q_all = np.loadtxt("Q_all.txt")
+                        s_all = np.loadtxt("s.txt")
+                        np.savetxt("Q_all.txt", np.concatenate((Q_all,Q),axis=2))
+                        np.savetxt("s.txt", np.concatenate((s_all,episodeSteps),axis=0))
+                    except:
+                        np.savetxt("Q_all.txt", Q)
+                        np.savetxt("s.txt",[episodeSteps])
+                    
+                    episode += 1
                     break
 
                 action = choose_action(current_state, episode)
@@ -200,6 +209,8 @@ if __name__ == '__main__':
                 print "Q values:"
                 print Q
                 print ""
+                
+                episodeSteps += 1
 
                 current_state = new_state
     finally:
