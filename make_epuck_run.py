@@ -10,7 +10,6 @@ import boxtracking
 def initialise_state():
     return np.random.randint(360)
 
-
 def choose_action(current_state, episode):
     eps = 1.0 / np.power(episode, greedyFactor)
     # Select max Q values
@@ -32,6 +31,13 @@ def choose_action(current_state, episode):
 
 def do_action(orientation, action):
     action = action - (nbOfActions // 2)
+    # As the box tracking is most precise in the front, we first turn
+    # the ePuck so that the box is in front of it
+    old_boxpos = box_position()
+    epuck.getMotor().drive(speed=0, dist=0, angle=old_boxpos)
+    sleep(1)
+
+    # Now we get a new estimate of the box position
     boxpos = box_position()
 
     print "Boxposition: " + str(boxpos)
@@ -45,7 +51,7 @@ def do_action(orientation, action):
     sleep(1)
 
     # After a while, the robot does weird movements
-    # This prevents it:
+    # This tries prevents it:
     epuck.reset()
 
     return (orientation + new_orientation) % (360)
@@ -62,6 +68,8 @@ def get_orientation(robOri):
 def box_position():
 
     resp = epuck.getProximitySensor().getValues()
+    # sometimes the readout fails, the while loop makes sure
+    # we retry until we have a new value
     while type(resp) == bool:
         resp = epuck.getProximitySensor().getValues()
     return boxtracking.get_box_position(resp)
