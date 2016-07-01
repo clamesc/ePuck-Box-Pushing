@@ -4,7 +4,7 @@ from time import sleep
 import math
 import numpy as np
 from robot.robot import robot
-import boxtracking
+from math import radians
 
 
 def initialise_state():
@@ -81,13 +81,67 @@ def get_reward(current_state):
     else:
         return 0
 
+def get_box_position(proximity_values, deg=True):
+    '''
+    Proximity values:
+
+    pos     robot
+
+    -135      3
+    -90       2
+    -45       1
+    -10       0
+    +10       7
+    +45       6
+    +90       5
+    +135      4
+    '''
+    proximity_values = np.array(proximity_values[:8])
+    neighbors, distances = getNeighbors(proximity_data, proximity_values, 3)
+    angles = target_values[neighbors]
+    if deg:
+        return weightedMean(angles, distances)
+    else:
+        return radians(weightedMean(angles, distances))
+
+
+def getNeighbors(trainingSet, testInstance, k):
+    length = len(trainingSet)
+    distances = np.zeros((length, 2))
+    for x in range(length):
+        distances[x, :] = [x, euclideanDistance(testInstance, trainingSet[x])]
+    distances = distances[distances[:, 1].argsort()]
+    return distances[:k, 0].astype(int), distances[:k, 1]
+
+
+def euclideanDistance(instance1, instance2):
+    distance = 0
+    for x in range(instance1.shape[0]):
+        distance += pow((instance1[x] - instance2[x]), 2)
+    return math.sqrt(distance)
+
+
+def weightedMean(targets, distances):
+    mean = 0
+    weights = 0
+    for i in range(distances.shape[0]):
+        weights += (1 / distances[i])
+        mean += (1 / distances[i]) * targets[i]
+    return mean / weights
+
 if __name__ == '__main__':
     try:
+        global epuck
         epuck = robot().getEpuck()
         epuck.connect()
         raw_input("Press Enter to continue...")
+        global proximity_data, target_values
+        proximity_data = np.loadtxt('proximity_values.txt')
+        target_values = np.arange(-18, 18) * 10
 
-        # Qlearning parameters
+        # Qlearning parameters global
+        global alpha, gamma, desiredDirection, nbOfActions, nbOfStates, turnAngle, stepsize, episode, greedyFactor, delta, Q
+        
         alpha = 0.5
         gamma = 0.8
         desiredDirection = 0
@@ -96,7 +150,6 @@ if __name__ == '__main__':
         turnAngle = 45
         stepsize = 90
         episode = int(np.loadtxt("e.txt"))#1
-        orientation = 0
         greedyFactor = 0.4
         delta = 360.0 / nbOfStates
         Q = np.loadtxt("Q.txt") #np.zeros((nbOfStates, nbOfActions))
@@ -109,7 +162,7 @@ if __name__ == '__main__':
             print "State: " + str(current_state)
 
             while True:
-                if current_state == 0:
+                if current_state == desiredDirection:
                     action = choose_action(current_state, episode)
                     print "Action: " + str(action)
 
