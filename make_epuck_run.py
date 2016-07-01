@@ -68,7 +68,7 @@ def box_position():
     # we retry until we have a new value
     while type(resp) == bool:
         resp = epuck.getProximitySensor().getValues()
-    return boxtracking.get_box_position(resp)
+    return get_box_position(resp)
 
 def get_reward(current_state):
     if current_state == int(desiredDirection // delta):
@@ -147,11 +147,11 @@ if __name__ == '__main__':
         delta = 360.0 / nbOfStates
         
         try:
-            episode = int(np.loadtxt("e.txt"))
+            episode = np.loadtxt("s.txt").shape[0]
         except:
             episode = 1
         try:
-            Q = np.loadtxt("Q.txt")
+            Q = np.loadtxt("Q.txt")[-1]
         except:
             Q = np.zeros((nbOfStates, nbOfActions))
         
@@ -182,12 +182,12 @@ if __name__ == '__main__':
                     print ""
                     
                     try:
-                        Q_all = np.loadtxt("Q_all.txt")
+                        Q = np.loadtxt("Q.txt")
                         s_all = np.loadtxt("s.txt")
-                        np.savetxt("Q_all.txt", np.concatenate((Q_all,Q),axis=2))
+                        np.savetxt("Q.txt", np.concatenate((Q,Q),axis=0))
                         np.savetxt("s.txt", np.concatenate((s_all,episodeSteps),axis=0))
                     except:
-                        np.savetxt("Q_all.txt", Q)
+                        np.savetxt("Q.txt", np.array([Q]))
                         np.savetxt("s.txt",[episodeSteps])
                     
                     episode += 1
@@ -214,8 +214,6 @@ if __name__ == '__main__':
 
                 current_state = new_state
     finally:
-        np.savetxt('Q.txt',Q)
-        np.savetxt('e.txt',[episode])
         epuck = robot().getEpuck()
         epuck.connect()
         epuck.reset()
