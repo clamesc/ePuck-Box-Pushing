@@ -150,6 +150,9 @@ def do_round(orientation):
     R = get_reward(new_state)
     Q[current_state, action] = Q[current_state, action] + alpha * \
         (R + gamma * max(Q[new_state, :]) - Q[current_state, action])
+
+    T[current_state, action, new_state] += 1
+
     print "Q values:"
     print Q
     print ""
@@ -167,6 +170,8 @@ def end_episode(orientation, episode):
     except:
         np.save("Q.npy", np.reshape(Q, (1, Q.shape[0], Q.shape[1])))
         np.save("s.npy", np.reshape([episodeSteps], (1)))
+    finally:
+        np.save("T.npy", T)
 
 if __name__ == '__main__':
     try:
@@ -180,7 +185,7 @@ if __name__ == '__main__':
 
         # Qlearning parameters global
         global alpha, gamma, desiredDirection, nbOfActions, nbOfStates, \
-            turnAngle, stepsize, episode, greedyFactor, delta, Q
+            turnAngle, stepsize, episode, greedyFactor, delta, Q, T
 
         alpha = 0.5
         gamma = 0.8
@@ -201,6 +206,10 @@ if __name__ == '__main__':
             Q = np.load("Q.npy")[-1]
         except:
             Q = np.zeros((nbOfStates, nbOfActions))
+        try:
+            T = np.load("T.npy")
+        except:
+            T = np.zeros((nbOfStates, nbOfActions, nbOfStates))
 
         while True:  # This iterates over complete episodes
             episodeSteps = 0
