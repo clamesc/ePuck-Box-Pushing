@@ -16,7 +16,7 @@ def learning_curve():
     fig, ax1 = plt.subplots(figsize=(6.5,5))
     
     # horizontal line
-    ax1.plot(np.arange(151), np.ones(151)*5, color='0.7', linestyle='--', linewidth=2.5)
+    ax1.plot([0,150], [5,5], color='0.7', linestyle='--', linewidth=2.5)
     
     # nb ob movements in each episode
     ax1.plot(s, 'k-')
@@ -97,3 +97,6 @@ def proxvalues():
     ax.set_ylabel('Proximity value')
 
     plt.show()
+    
+if __name__ == '__main__':
+    learning_curve()
