@@ -2,6 +2,24 @@ import graphviz as gv
 import numpy as np
 import math
 
+# Gives back 2D Array [Actions x Resulting State]
+def transitions():
+    T = np.load("T.npy")
+    t = np.zeros((3,5))
+    for a in range(T.shape[1]):
+        for s in range(T.shape[0]):
+            ll_ind = (s-2)%10
+            l_ind = (s-1)%10
+            rr_ind = (s+2)%10
+            r_ind = (s+1)%10
+            t[a,0] += T[s,a,ll_ind]
+            t[a,1] += T[s,a,l_ind]
+            t[a,2] += T[s,a,s]
+            t[a,3] += T[s,a,r_ind]
+            t[a,4] += T[s,a,rr_ind]
+    for a in range(t.shape[0]):
+        t[a] = t[a]/sum(t[a])
+    return t
 
 def calc_circlepos(i, i_max):
     radius = 3
