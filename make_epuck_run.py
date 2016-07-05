@@ -147,11 +147,11 @@ if __name__ == '__main__':
         delta = 360.0 / nbOfStates
         
         try:
-            episode = np.loadtxt("s.txt").shape[0]
+            episode = np.load("s.npy").shape[0]
         except:
             episode = 1
         try:
-            Q = np.loadtxt("Q.txt")[-1]
+            Q = np.load("Q.npy")[-1]
         except:
             Q = np.zeros((nbOfStates, nbOfActions))
         
@@ -182,13 +182,13 @@ if __name__ == '__main__':
                     print ""
                     
                     try:
-                        Q_old = np.loadtxt("Q.txt")
-                        s_old = np.loadtxt("s.txt")
-                        np.savetxt("Q.txt", np.concatenate((Q_old,Q),axis=0))
-                        np.savetxt("s.txt", np.concatenate((s_old,np.array([episodeSteps])),axis=0))
+                        Q_old = np.load("Q.npy")
+                        s_old = np.load("s.npy")
+                        np.save("Q.npy", np.concatenate((Q_old,np.reshape(Q, (1,Q.shape[0], Q.shape[1])),axis=0))
+                        np.save("s.npy", np.concatenate((s_old, [episodeSteps]),axis=0))
                     except:
-                        np.savetxt("Q.txt", np.array([Q]))
-                        np.savetxt("s.txt",[episodeSteps])
+                        np.save("Q.npy", np.reshape(Q, (1,Q.shape[0], Q.shape[1])))
+                        np.save("s.npy", np.reshape([episodeSteps], (1)))
                     
                     episode += 1
                     break
