@@ -153,8 +153,7 @@ def do_round(orientation):
     return orientation
 
 
-def end_episode(orientation):
-    global episode
+def end_episode(orientation, episode):
     orientation = do_round(orientation)
     try:
         Q_old = np.load("Q.npy")
@@ -165,7 +164,6 @@ def end_episode(orientation):
     except:
         np.save("Q.npy", np.reshape(Q, (1, Q.shape[0], Q.shape[1])))
         np.save("s.npy", np.reshape([episodeSteps], (1)))
-    episode += 1
 
 if __name__ == '__main__':
     try:
@@ -206,10 +204,11 @@ if __name__ == '__main__':
             robOri = initialise_state()
             while True:  # This iterates over rounds in an episode
                 if get_current_state(robOri) == desiredDirection:
-                    end_episode(robOri)
                     break
                 robOri = do_round(robOri)
                 episodeSteps += 1
+            end_episode(robOri, episode)
+            episode += 1
     finally:
         epuck = robot().getEpuck()
         epuck.connect()
