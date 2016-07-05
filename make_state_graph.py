@@ -11,10 +11,12 @@ if __name__ == "__main__":
         Pt[s] = Pt[s] / np.sum(Pt[s])
     print Pt
 
-    dot = gv.Digraph(comment='The Round Table')
-    dot.node(str(0), 'desired direction')
-    for i in range(1, T.shape[0]):
-        dot.node(str(i))
+    dot = gv.Digraph(comment='The Round Table', graph_attr={('layout', 'circo')})
+    for i in range(0, T.shape[0]):
+        if i == 0:
+            dot.node(str(i), label='desired direction')
+        else:
+            dot.node(str(i))
         for t in range(Pt.shape[1]):
             if Pt[i][t] != 0.0:
                 dot.edge(str(i), str(t), label=str("%0.2f" % Pt[i][t]))
