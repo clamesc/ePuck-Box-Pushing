@@ -10,6 +10,7 @@ from math import radians
 def initialise_state():
     return np.random.randint(360)
 
+
 def choose_action(current_state, episode):
     eps = 1.0 / np.power(episode, greedyFactor)
     # Select max Q values
@@ -27,6 +28,7 @@ def choose_action(current_state, episode):
     else:
         i = np.random.randint(nbOfActions - 1)
         return np.delete(np.arange(nbOfActions), qmax)[i]
+
 
 def do_action(orientation, action):
     action = action - (nbOfActions // 2)
@@ -55,11 +57,14 @@ def do_action(orientation, action):
 
     return (orientation + new_orientation) % (360)
 
+
 def get_current_state(robOri):
     return int(get_orientation(robOri) // delta)
 
+
 def get_orientation(robOri):
     return (robOri + box_position()) % (360)
+
 
 def box_position():
 
@@ -70,11 +75,13 @@ def box_position():
         resp = epuck.getProximitySensor().getValues()
     return get_box_position(resp)
 
+
 def get_reward(current_state):
     if current_state == int(desiredDirection // delta):
         return 100
     else:
         return 0
+
 
 def get_box_position(proximity_values, deg=True):
     '''
@@ -108,11 +115,13 @@ def getNeighbors(trainingSet, testInstance, k):
     distances = distances[distances[:, 1].argsort()]
     return distances[:k, 0].astype(int), distances[:k, 1]
 
+
 def euclideanDistance(instance1, instance2):
     distance = 0
     for x in range(instance1.shape[0]):
         distance += pow((instance1[x] - instance2[x]), 2)
     return math.sqrt(distance)
+
 
 def weightedMean(targets, distances):
     mean = 0
@@ -121,6 +130,42 @@ def weightedMean(targets, distances):
         weights += (1 / distances[i])
         mean += (1 / distances[i]) * targets[i]
     return mean / weights
+
+
+def do_round(orientation):
+    global alpha, gamma
+    current_state = get_current_state(orientation)
+    print "Old State: {}".format(current_state)
+    action = choose_action(current_state, episode)
+    print "Action   : {}".format(action)
+
+    orientation = do_action(orientation, action)
+
+    new_state = get_current_state(orientation)
+    print "New state: {}".format(new_state)
+
+    R = get_reward(new_state)
+    Q[current_state, action] = Q[current_state, action] + alpha * \
+        (R + gamma * max(Q[new_state, :]) - Q[current_state, action])
+    print "Q values:"
+    print Q
+    print ""
+    return orientation
+
+
+def end_episode(orientation):
+    global episode
+    orientation = do_round(orientation)
+    try:
+        Q_old = np.load("Q.npy")
+        s_old = np.load("s.npy")
+        np.save("Q.npy", np.concatenate(
+            (Q_old, np.reshape(Q, (1, Q.shape[0], Q.shape[1]))), axis=0))
+        np.save("s.npy", np.concatenate((s_old, [episodeSteps]), axis=0))
+    except:
+        np.save("Q.npy", np.reshape(Q, (1, Q.shape[0], Q.shape[1])))
+        np.save("s.npy", np.reshape([episodeSteps], (1)))
+    episode += 1
 
 if __name__ == '__main__':
     try:
@@ -133,8 +178,9 @@ if __name__ == '__main__':
         target_values = np.arange(-18, 18) * 10
 
         # Qlearning parameters global
-        global alpha, gamma, desiredDirection, nbOfActions, nbOfStates, turnAngle, stepsize, episode, greedyFactor, delta, Q
-        
+        global alpha, gamma, desiredDirection, nbOfActions, nbOfStates, \
+            turnAngle, stepsize, episode, greedyFactor, delta, Q
+
         alpha = 0.5
         gamma = 0.8
         desiredDirection = 0
@@ -145,7 +191,7 @@ if __name__ == '__main__':
         episodeSteps = 0
         greedyFactor = 0.4
         delta = 360.0 / nbOfStates
-        
+
         try:
             episode = np.load("s.npy").shape[0]
         except:
@@ -154,67 +200,16 @@ if __name__ == '__main__':
             Q = np.load("Q.npy")[-1]
         except:
             Q = np.zeros((nbOfStates, nbOfActions))
-        
-        while True:
+
+        while True:  # This iterates over complete episodes
             episodeSteps = 0
-            
             robOri = initialise_state()
-            print "Orientation: " + str(robOri)
-
-            current_state = get_current_state(robOri)
-            print "State: " + str(current_state)
-
-            while True:
-                if current_state == desiredDirection:
-                    action = choose_action(current_state, episode)
-                    print "Action: " + str(action)
-
-                    robOri = do_action(robOri, action)
-                    print "Orientation:" + str(robOri)
-
-                    new_state = get_current_state(robOri)
-                    print "New state:" + str(new_state)
-
-                    R = get_reward(new_state)
-                    Q[current_state, action] = Q[current_state, action] + alpha * \
-                        (R + gamma * max(Q[new_state, :]) - Q[current_state, action])
-
-                    print "Q values:"
-                    print Q
-                    print ""
-                    
-                    try:
-                        Q_old = np.load("Q.npy")
-                        s_old = np.load("s.npy")
-                        np.save("Q.npy", np.concatenate((Q_old,np.reshape(Q, (1,Q.shape[0], Q.shape[1]))),axis=0))
-                        np.save("s.npy", np.concatenate((s_old, [episodeSteps]),axis=0))
-                    except:
-                        np.save("Q.npy", np.reshape(Q, (1,Q.shape[0], Q.shape[1])))
-                        np.save("s.npy", np.reshape([episodeSteps], (1)))
-                    
-                    episode += 1
+            while True:  # This iterates over rounds in an episode
+                if get_current_state(robOri) == desiredDirection:
+                    robOri = end_episode(robOri)
                     break
-
-                action = choose_action(current_state, episode)
-                print "Action: " + str(action)
-
-                robOri = do_action(robOri, action)
-                print "Orientation:" + str(robOri)
-
-                new_state = get_current_state(robOri)
-                print "New state:" + str(new_state)
-
-                R = get_reward(new_state)
-                Q[current_state, action] = Q[current_state, action] + alpha * \
-                    (R + gamma * max(Q[new_state, :]) - Q[current_state, action])
-
-                print "Q values:"
-                print Q
-                print ""
-                
+                robOri = do_round(robOri)
                 episodeSteps += 1
-
-                current_state = new_state
     finally:
         epuck = robot().getEpuck()
         epuck.connect()
