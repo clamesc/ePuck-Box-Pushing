@@ -206,7 +206,7 @@ if __name__ == '__main__':
             robOri = initialise_state()
             while True:  # This iterates over rounds in an episode
                 if get_current_state(robOri) == desiredDirection:
-                    robOri = end_episode(robOri)
+                    end_episode(robOri)
                     break
                 robOri = do_round(robOri)
                 episodeSteps += 1
