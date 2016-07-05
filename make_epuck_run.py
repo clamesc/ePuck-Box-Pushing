@@ -1,5 +1,4 @@
 #!/usr/bin/python
-from random import randint
 from time import sleep
 import math
 import numpy as np
@@ -117,6 +116,10 @@ def getNeighbors(trainingSet, testInstance, k):
 
 
 def euclideanDistance(instance1, instance2):
+    """ Calculates the euclidean distance between two vectors.
+        We have to re-implement this because the version of numpy is too low
+        on the ePuck
+    """
     distance = 0
     for x in range(instance1.shape[0]):
         distance += pow((instance1[x] - instance2[x]), 2)
@@ -135,14 +138,14 @@ def weightedMean(targets, distances):
 def do_round(orientation):
     global alpha, gamma
     current_state = get_current_state(orientation)
-    print "Old State: {}".format(current_state)
+    print "Old State: " + str(current_state)
     action = choose_action(current_state, episode)
-    print "Action   : {}".format(action)
+    print "Action   : " + str(action)
 
     orientation = do_action(orientation, action)
 
     new_state = get_current_state(orientation)
-    print "New state: {}".format(new_state)
+    print "New state: " + str(new_state)
 
     R = get_reward(new_state)
     Q[current_state, action] = Q[current_state, action] + alpha * \
