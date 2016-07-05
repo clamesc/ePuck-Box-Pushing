@@ -7,7 +7,7 @@ from math import radians
 
 
 def initialise_state():
-    return 6
+    return 180
 
 
 def choose_action(current_state, episode):
@@ -39,9 +39,6 @@ def do_action(orientation, action):
 
     # Now we get a new estimate of the box position
     boxpos = box_position()
-
-    print "Boxposition: " + str(boxpos)
-    print 'Turn: ' + str(boxpos + action * turnAngle)
 
     new_orientation = old_boxpos + boxpos + action * turnAngle
 
