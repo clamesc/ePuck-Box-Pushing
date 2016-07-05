@@ -156,6 +156,8 @@ if __name__ == '__main__':
             Q = np.zeros((nbOfStates, nbOfActions))
         
         while True:
+            episodeSteps = 0
+            
             robOri = initialise_state()
             print "Orientation: " + str(robOri)
 
@@ -184,7 +186,7 @@ if __name__ == '__main__':
                     try:
                         Q_old = np.load("Q.npy")
                         s_old = np.load("s.npy")
-                        np.save("Q.npy", np.concatenate((Q_old,np.reshape(Q, (1,Q.shape[0], Q.shape[1])),axis=0))
+                        np.save("Q.npy", np.concatenate((Q_old,np.reshape(Q, (1,Q.shape[0], Q.shape[1]))),axis=0))
                         np.save("s.npy", np.concatenate((s_old, [episodeSteps]),axis=0))
                     except:
                         np.save("Q.npy", np.reshape(Q, (1,Q.shape[0], Q.shape[1])))
