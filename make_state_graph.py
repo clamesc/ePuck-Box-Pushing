@@ -32,6 +32,12 @@ def calc_circlepos(i, i_max, radius=2):
 def calc_ori(i, i_max):
     return str(math.degrees(math.pi * 2.0 * float(i) / float(i_max)) - 1.5 * math.pi)
 
+
+def calc_linepos(i, i_max):
+    posy = 0
+    posx = i + i_max / 2
+    return "{},{}!".format(posx, posy)
+
 if __name__ == "__main__":
     T = np.load("Data/2016_07_05-2_T.npy")
     Pt = np.zeros((T.shape[0], T.shape[0]))
@@ -52,9 +58,27 @@ if __name__ == "__main__":
         else:
             dot.node(str(i), pos=calc_circlepos(i, T.shape[0]))
         for t in range(Pt.shape[1]):
-            if Pt[i][t] != 0.0:
-                dot.edge(str(i), str(t), label=str("%0.2f" %
-                                                   Pt[i][t]), location=calc_circlepos(i, T.shape[0], 2.4))
+            if Pt[i][t] > 0.004:
+                dot.edge(str(i), str(t), label=str("%0.2f" % Pt[i][t]),
+                         location=calc_circlepos(i, T.shape[0], 2.4))
 
     print dot.source
-    dot.render('state_transisitions', view=True)
+    dot.render('state_transisitions', view=False)
+
+    tr = transitions(T)
+    dot2 = gv.Digraph(comment='Average State Transition Probabilities',
+                      node_attr={('shape', 'circle')},
+                      graph_attr={('layout', 'neato')})
+
+    for a in range(tr.shape[0]):
+        for s in range(tr.shape[1]):
+            if a == 0:
+                dot2.node(str(s), pos=calc_linepos(s, tr.shape[1]))
+
+    for a in range(tr.shape[0]):
+        for s in range(tr.shape[1]):
+            print str(a) + " " + str(s)
+            if tr[a][s] > 0.0004:
+                dot2.edge(str(a), str(s), label=str("%0.3f" % tr[a][s]))
+    print dot2.source
+    dot2.render('average_state_transisitions', view=True)
