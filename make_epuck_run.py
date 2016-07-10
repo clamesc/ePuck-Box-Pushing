@@ -18,7 +18,7 @@ def choose_action(current_state, episode):
     qmax = qmax[np.random.randint(qmax.shape[0])]
     # Define probabilities for non-greedy actions
     p_nonGreedy = eps / nbOfActions
-    # Deine probability for greedy action
+    # Define probability for greedy action
     p_greedy = 1 - p_nonGreedy * (nbOfActions - 1)
     # Randomly choose action from distribution
     greedy = np.random.binomial(1, p_greedy) == 1
