@@ -1,5 +1,7 @@
 # ePuck Box-Pushing Project
 
+[Final presentation](reports/final_report.pdf)
+
 This is the final code for the Applied RL class in SS2016 for the only ePuck group consisting of
 
 Claus Meschede
